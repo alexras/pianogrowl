@@ -44,7 +44,6 @@ for line in sys.stdin:
 growl_title = None
 growl_message = None
 growl_image = pandora_icon
-cover_art_tmpfile = None
 
 if command == "songstart":
     if int(command_data["rating"]) == 1:
@@ -52,10 +51,19 @@ if command == "songstart":
     else:
         heart = ""
 
-    (imgfp, growl_image) = tempfile.mkstemp(prefix="pianobar")
-    urlfp = urllib2.urlopen(command_data["coverArt"])
-    os.write(imgfp, urlfp.read())
-    os.close(imgfp)
+    cover_art_url = command_data["coverArt"].strip()
+
+    if len(cover_art_url) > 0:
+        (imgfp, growl_image) = tempfile.mkstemp(prefix="pianobar")
+
+        try:
+            urlfp = urllib2.urlopen(cover_art_url)
+            os.write(imgfp, urlfp.read())
+        except ValueError, e:
+            os.unlink(growl_image)
+            growl_image = pandora_icon
+        finally:
+            os.close(imgfp)
 
     growl_title = "%s%s" % (heart, command_data["title"])
     growl_message = "by: %s\non: %s" % (command_data["artist"],
