@@ -62,6 +62,9 @@ if command == "songstart":
         except ValueError, e:
             os.unlink(growl_image)
             growl_image = pandora_icon
+        except urllib2.URLError, e:
+            os.unlink(growl_image)
+            growl_image = pandora_icon
         finally:
             os.close(imgfp)
 
